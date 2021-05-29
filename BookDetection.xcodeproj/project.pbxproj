@@ -3,10 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		35C794EDBB825FCA1129CEED /* Pods_BookDetection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B00DFBEB891C69340FC139FF /* Pods_BookDetection.framework */; };
 		E99F641D26595CBE00FBF0D4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E99F641C26595CBE00FBF0D4 /* AppDelegate.swift */; };
 		E99F641F26595CBE00FBF0D4 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E99F641E26595CBE00FBF0D4 /* SceneDelegate.swift */; };
 		E99F642126595CBE00FBF0D4 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E99F642026595CBE00FBF0D4 /* ViewController.swift */; };
@@ -16,6 +17,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		8E06ED845154B49D37346990 /* Pods-BookDetection.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BookDetection.release.xcconfig"; path = "Target Support Files/Pods-BookDetection/Pods-BookDetection.release.xcconfig"; sourceTree = "<group>"; };
+		B00DFBEB891C69340FC139FF /* Pods_BookDetection.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BookDetection.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		E52C606B591A966E13FDFDDD /* Pods-BookDetection.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BookDetection.debug.xcconfig"; path = "Target Support Files/Pods-BookDetection/Pods-BookDetection.debug.xcconfig"; sourceTree = "<group>"; };
+		E98ECBBA265E22EB00E10B11 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		E99F641926595CBE00FBF0D4 /* BookDetection.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BookDetection.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E99F641C26595CBE00FBF0D4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E99F641E26595CBE00FBF0D4 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -31,17 +36,38 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				35C794EDBB825FCA1129CEED /* Pods_BookDetection.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		37E36BB5F58794F7295794AD /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				E52C606B591A966E13FDFDDD /* Pods-BookDetection.debug.xcconfig */,
+				8E06ED845154B49D37346990 /* Pods-BookDetection.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		8E75B817D853EA7AB88C97C8 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E98ECBBA265E22EB00E10B11 /* Accelerate.framework */,
+				B00DFBEB891C69340FC139FF /* Pods_BookDetection.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		E99F641026595CBE00FBF0D4 = {
 			isa = PBXGroup;
 			children = (
 				E99F641B26595CBE00FBF0D4 /* BookDetection */,
 				E99F641A26595CBE00FBF0D4 /* Products */,
+				37E36BB5F58794F7295794AD /* Pods */,
+				8E75B817D853EA7AB88C97C8 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -74,9 +100,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = E99F642D26595CBE00FBF0D4 /* Build configuration list for PBXNativeTarget "BookDetection" */;
 			buildPhases = (
+				C6FD679D9F1804277A010790 /* [CP] Check Pods Manifest.lock */,
 				E99F641526595CBE00FBF0D4 /* Sources */,
 				E99F641626595CBE00FBF0D4 /* Frameworks */,
 				E99F641726595CBE00FBF0D4 /* Resources */,
+				E161B8B11FBB7DB169F43C59 /* [CP] Embed Pods Frameworks */,
+				95F2356BD9C1AC6585CF7B17 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -131,6 +160,65 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		95F2356BD9C1AC6585CF7B17 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BookDetection/Pods-BookDetection-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BookDetection/Pods-BookDetection-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BookDetection/Pods-BookDetection-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C6FD679D9F1804277A010790 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-BookDetection-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E161B8B11FBB7DB169F43C59 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BookDetection/Pods-BookDetection-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BookDetection/Pods-BookDetection-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BookDetection/Pods-BookDetection-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		E99F641526595CBE00FBF0D4 /* Sources */ = {
@@ -283,12 +371,14 @@
 		};
 		E99F642E26595CBE00FBF0D4 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E52C606B591A966E13FDFDDD /* Pods-BookDetection.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 5R49KQXW55;
 				INFOPLIST_FILE = BookDetection/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -302,12 +392,14 @@
 		};
 		E99F642F26595CBE00FBF0D4 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8E06ED845154B49D37346990 /* Pods-BookDetection.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 5R49KQXW55;
 				INFOPLIST_FILE = BookDetection/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
