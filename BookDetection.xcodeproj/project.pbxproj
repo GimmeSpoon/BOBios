@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		35C794EDBB825FCA1129CEED /* Pods_BookDetection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B00DFBEB891C69340FC139FF /* Pods_BookDetection.framework */; };
+		E91E90C6267D65810066B639 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = E91E90C5267D65810066B639 /* GoogleService-Info.plist */; };
 		E99F641D26595CBE00FBF0D4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E99F641C26595CBE00FBF0D4 /* AppDelegate.swift */; };
 		E99F641F26595CBE00FBF0D4 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E99F641E26595CBE00FBF0D4 /* SceneDelegate.swift */; };
 		E99F642126595CBE00FBF0D4 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E99F642026595CBE00FBF0D4 /* ViewController.swift */; };
@@ -20,6 +21,7 @@
 		8E06ED845154B49D37346990 /* Pods-BookDetection.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BookDetection.release.xcconfig"; path = "Target Support Files/Pods-BookDetection/Pods-BookDetection.release.xcconfig"; sourceTree = "<group>"; };
 		B00DFBEB891C69340FC139FF /* Pods_BookDetection.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BookDetection.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E52C606B591A966E13FDFDDD /* Pods-BookDetection.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BookDetection.debug.xcconfig"; path = "Target Support Files/Pods-BookDetection/Pods-BookDetection.debug.xcconfig"; sourceTree = "<group>"; };
+		E91E90C5267D65810066B639 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		E98ECBBA265E22EB00E10B11 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		E99F641926595CBE00FBF0D4 /* BookDetection.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BookDetection.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E99F641C26595CBE00FBF0D4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -89,6 +91,7 @@
 				E99F642526595CBE00FBF0D4 /* Assets.xcassets */,
 				E99F642726595CBE00FBF0D4 /* LaunchScreen.storyboard */,
 				E99F642A26595CBE00FBF0D4 /* Info.plist */,
+				E91E90C5267D65810066B639 /* GoogleService-Info.plist */,
 			);
 			path = BookDetection;
 			sourceTree = "<group>";
@@ -154,6 +157,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E99F642926595CBE00FBF0D4 /* LaunchScreen.storyboard in Resources */,
+				E91E90C6267D65810066B639 /* GoogleService-Info.plist in Resources */,
 				E99F642626595CBE00FBF0D4 /* Assets.xcassets in Resources */,
 				E99F642426595CBE00FBF0D4 /* Main.storyboard in Resources */,
 			);

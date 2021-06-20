@@ -1,41 +1,25 @@
 import UIKit
-import AVFoundation
-import Photos
-import MLKit
+import ARKit
+import Firebase
 
-class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate,
-    UITextFieldDelegate{
+class ARViewController: UIViewController, ARSCNViewDelegate{
     
     /*------------------------------------------*/
     /*                Properties                */
     /*------------------------------------------*/
-    //Outlet to the main storyboard
-    @IBOutlet weak var preview: UIView!
-    @IBOutlet weak var searchBar: UITextField!
-    @IBOutlet weak var titleBar: UILabel!
     
-    //Camera caputre
-    var captureSession: AVCaptureSession!
-    var videoPreviewLayer: AVCaptureVideoPreviewLayer!
-    private let videoOutput = AVCaptureVideoDataOutput()
+    //for text searching
+    var searchString: String = "게임"
     
-    //for text search
-    var searchString: String = "search"
-    //MLKit TextRecognizer
-    let textRecognizer = TextRecognizer.textRecognizer()
+    //Cloud Vision
+    //let textRecognizer = MLKit.TextRecognizer()
+    lazy var functions = Functions.functions()
     
-    //UI instances needed for drawing the boxes.
-    var overlayView:UIView!
-    let shapeLayer:CAShapeLayer = CAShapeLayer()
+    // AR Scene
+    @IBOutlet var sceneView: ARSCNView!
+    let bubbleDepth : Float = 0.01 // the 'depth' of 3D text
+    var latestPrediction : String = "…" // a variable containing the latest CoreML prediction
     
-    //For scaling the coordinates of bouding boxes to the UI View
-    var scaleX:CGFloat = 0.0
-    var scaleY:CGFloat = 0.0
-    var viewX:CGFloat = 0.0
-    var viewY:CGFloat = 0.0
-    
-    /*------------------------------------------*/
-    /*             Functions (Default)          */
     /*------------------------------------------*/
     
     //After loaded
@@ -43,204 +27,149 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        //Search text field and keyboard
-        searchBar.delegate = self
-        NotificationCenter.default.addObserver(self, selector: #selector(kbShow), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(kbHide), name: UIResponder.keyboardWillHideNotification, object: nil)
-    }
-    
-    //After showing Views
-    //setting AVCapture session and UI views here.
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+        //Set up ARview
+        sceneView.delegate = self
         
-        captureSession = AVCaptureSession()
-        captureSession.sessionPreset = .high
+        //sceneView.showStatistics = true
+        let scene = SCNScene()
+        sceneView.scene = scene
         
-        //Add Overlay View
-        overlayView = UIView.init(frame: self.preview.bounds)
-        preview.superview?.addSubview(overlayView)
-        preview.superview?.bringSubviewToFront(searchBar)
+        //Only for test. When releasing, comment or delete this line
+        sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints, ARSCNDebugOptions.showWorldOrigin]
+        //sceneView.autoenablesDefaultLighting = true // visually better
         
-        //Configure Drawing Layer
-        shapeLayer.lineWidth = 3
-        shapeLayer.strokeColor = UIColor.red.cgColor
-        shapeLayer.fillColor = UIColor.green.withAlphaComponent(0.3).cgColor
+        // Authentication ( Reauired for using Cloud Vision Text Recognition )
         
-        overlayView.layer.addSublayer(shapeLayer)
-        
-        viewX = overlayView.frame.maxX
-        viewY = overlayView.frame.maxY
-        
-        //Set AVCapture Device
-        guard let backCamera = AVCaptureDevice.default(for: AVMediaType.video)
-        else {
-            print("Unable to access back camera!")
-            return
-        }
-        
-        //Add input to the capture session
-        do {
-            let input = try AVCaptureDeviceInput(device: backCamera)
-            //set up the preview and output
-            if captureSession.canAddInput(input){
-                captureSession.addInput(input)
-                setupLivePreview()
+        /*Auth.auth().createUser(withEmail: "abcde@abcde.com", password: "1q2w3e4r" ) { authResult, error in
+            if error != nil {
+                debugPrint(error!.localizedDescription)
+                debugPrint(error.debugDescription)
             }
-            self.captureSession.startRunning()
-            print("setup done")
+        }*/
+        Auth.auth().signIn(withEmail: "abcde@abcde.com", password: "1q2w3e4r") { [weak self] authResult, error in
+            if error != nil {
+                debugPrint(error!.localizedDescription)
+                debugPrint(error.debugDescription)
+            }
         }
-        catch let error {
-            print("Error Unable to initialize back camera: \(error.localizedDescription)")
-        }
-    }
-    
-    /*------------------------------------------*/
-    /*            Functions (Configure)         */
-    /*------------------------------------------*/
-    
-    //Configure preview layer and add it as a sublayer to the UI
-    func setupLivePreview() {
-        videoPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-        videoPreviewLayer.videoGravity = .resizeAspect
-        videoPreviewLayer.connection?.videoOrientation = .portrait
-        preview.layer.addSublayer(self.videoPreviewLayer)
         
-        //add output to the capture session
-        self.addVideoOutput()
-        self.videoPreviewLayer.frame = self.preview.bounds
+        // Send request to the Cloud Vision periodically
+        cloudOCR()
     }
     
-    //Stop capture session when collapsing the views
+    //ViewWillAppear
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        // Configure AR Tracking
+        let configuration = ARWorldTrackingConfiguration()
+        configuration.planeDetection = .horizontal
+        
+        // Run ARView's session
+        sceneView.session.run(configuration)
+    }
+    
+    //viewWIllDisappear
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        self.captureSession.stopRunning()
+        sceneView.session.pause()
     }
     
-    //Add and configure output to the capture session
-    private func addVideoOutput() {
-        self.videoOutput.videoSettings = [(kCVPixelBufferPixelFormatTypeKey as NSString) : NSNumber(value:kCVPixelFormatType_32BGRA)] as [String : Any]
-        self.videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "my.image.hadnling.queue"))
-        self.videoOutput.alwaysDiscardsLateVideoFrames = true
-        self.captureSession.addOutput(self.videoOutput)
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // The original developer commented to release any cached data here
     }
     
-    /*------------------------------------------*/
-    /*              Text Recognition            */
-    /*------------------------------------------*/
-    
-    //After capturing preview, image processed here asynchronously
-    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        
-        //IMG Processing starts
-        
-        //Set up scale constants
-        let imgbuf:CVImageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)!
-        scaleX = self.viewX / CGFloat(CVPixelBufferGetHeight(imgbuf))
-        scaleY = self.viewY / CGFloat(CVPixelBufferGetWidth(imgbuf))
-        //Get results from textRecognizer
-        var blocks: [TextBlock]
-        let image = VisionImage(buffer: sampleBuffer)
-        image.orientation = imageOrientation(
-            deviceOrientation: UIDeviceOrientation.portrait,
-            cameraPosition: AVCaptureDevice.Position.back)
-        
-        do{
-            blocks = try textRecognizer.results(in: image).blocks
-        }
-        catch{
-            print("Frame Dropped")
-            return
-        }
-        
-        //Search for the text for every block and if exists, draw the bounding box
-        for block in blocks {
-            if( block.text.contains(searchString)){
-                DispatchQueue.main.async {
-                    self.drawBox(points: block.cornerPoints)
-                    self.setTitle(text: block.text)
+    /* Cloud OCR */
+    /* Send Requests Cloud OCR and Draw Boxes as the results */
+    func cloudOCR() {
+        Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { timer in
+            
+            let data = self.sceneView.snapshot().jpegData(compressionQuality: 1.0)
+            
+            struct requestData: Encodable {
+                let image: [String: Data]
+                let features = [["type":"TEXT_DETECTION"]]
+                let imageContext = ["languageHints": ["en","kr"]]
+                init(imageData:Data) {
+                    image = ["content": imageData]
                 }
             }
-            else {
-                DispatchQueue.main.async {
-                    self.cleanUI()
+            
+            let encoder = JSONEncoder()
+            let encodedData = try! encoder.encode(requestData(imageData:data!))
+            let string = String(data: encodedData, encoding: .utf8)!
+            
+            //Send a request to the Cloud Vision API
+            self.functions.httpsCallable("annotateImage").call(string) { (result, error) in
+                //ERROR
+                if let error = error as NSError? {
+                    if error.domain == FunctionsErrorDomain {
+                        let code = FunctionsErrorCode(rawValue: error.code)
+                        let message = error.localizedDescription
+                        let details = error.userInfo[FunctionsErrorDetailsKey]
+                        debugPrint(code!, message, details ?? "")
+                    }
                 }
+                //SUCCESS
+                print("RESULT \(result?.data)")
             }
-        }
-        
-    }
-    
-    //MLKit example code. setting orientation for the textrecognizer
-    func imageOrientation(
-      deviceOrientation: UIDeviceOrientation,
-      cameraPosition: AVCaptureDevice.Position
-    ) -> UIImage.Orientation {
-      switch deviceOrientation {
-      case .portrait:
-        return cameraPosition == .front ? .leftMirrored : .right
-      case .landscapeLeft:
-        return cameraPosition == .front ? .downMirrored : .up
-      case .portraitUpsideDown:
-        return cameraPosition == .front ? .rightMirrored : .left
-      case .landscapeRight:
-        return cameraPosition == .front ? .upMirrored : .down
-      case .faceDown, .faceUp, .unknown:
-        return .up
-      }
+            
+        }//End of Timer
     }
     
     /*------------------------------------------*/
-    /*               Visulaization              */
+    /*               Visualization              */
     /*------------------------------------------*/
     
-    //Draw bounding boxes.
-    func drawBox(points:[NSValue]){
-        
-        shapeLayer.path = nil
-        let path = UIBezierPath()
-        
-        path.move(to: CGPoint( x:translateX(x: CGFloat((points[0] as! CGPoint).y)),y:translateY(y: CGFloat((points[0] as! CGPoint).x))))
-        path.addLine(to: CGPoint( x:translateX(x: CGFloat((points[1] as! CGPoint).y)),y:translateY(y: CGFloat((points[1] as! CGPoint).x))))
-        path.addLine(to: CGPoint( x:translateX(x: CGFloat((points[2] as! CGPoint).y)),y:translateY(y: CGFloat((points[2] as! CGPoint).x))))
-        path.addLine(to: CGPoint( x:translateX(x: CGFloat((points[3] as! CGPoint).y)),y:translateY(y: CGFloat((points[3] as! CGPoint).x))))
-        path.addLine(to: CGPoint( x:translateX(x: CGFloat((points[0] as! CGPoint).y)),y:translateY(y: CGFloat((points[0] as! CGPoint).x))))
-        
-        //print("\(points[0]) , \(points[2])")
-        
-        self.shapeLayer.path = path.cgPath
-        
+    // Not sure what this is for. Assumes this function is called by ARSession at every frame.
+    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
+        /*DispatchQueue.main.async {
+            // ??
+        }*/
     }
     
-    //Change the text of the label
-    func setTitle(text:String){
-        self.titleBar.text = text
-    }
-    
-    //Clean every box on the overlay view.
-    func cleanUI (){
-        shapeLayer.path = nil
-    }
-    
-    //scale the coordinates
-    private func translateX (x:CGFloat)-> CGFloat{ return x * self.scaleX }
-    private func translateY (y:CGFloat)-> CGFloat{ return y * self.scaleY }
-    
-    //Keyboard actions
-    @objc
-    func kbShow (_ sender:Notification){
-        self.view.frame.origin.y = -300
-    }
-    @objc
-    func kbHide (_ sender:Notification){
-        self.view.frame.origin.y = 0
-    }
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        searchString = searchBar.text ?? "search"
-        self.view.endEditing(true)
-    }
-    func textFieldShouldReturn (_ textField:UITextField)->Bool{
-        searchString = searchBar.text ?? "search"
-        self.view.endEditing(true)
+    // Full screen
+    override var prefersStatusBarHidden: Bool {
         return true
+    }
+    
+    //Create a Bubble Node
+    func createNewBubbleParentNode(_ text : String) -> SCNNode {
+        // The original developer advises to use less polygons, letters, smoothness, etc.
+        
+        let billboardConstraint = SCNBillboardConstraint()
+        billboardConstraint.freeAxes = SCNBillboardAxis.Y
+        
+        // BUBBLE TEXT
+        let bubble = SCNText(string: text, extrusionDepth: CGFloat(bubbleDepth))
+        let font = UIFont(name: "Futura", size:0.15)
+        bubble.font = font
+        bubble.firstMaterial?.diffuse.contents = UIColor.orange
+        bubble.firstMaterial?.specular.contents = UIColor.white
+        bubble.firstMaterial?.isDoubleSided = true
+        // bubble.flatness // setting this too low can cause crashes.
+        bubble.chamferRadius = CGFloat(bubbleDepth)
+        
+        // BUBBLE NODE
+        let (minBound, maxBound) = bubble.boundingBox
+        let bubbleNode = SCNNode(geometry: bubble)
+        // Centre Node - to Centre-Botoom point
+        bubbleNode.pivot = SCNMatrix4MakeTranslation( (maxBound.x - minBound.x)/2, minBound.y, bubbleDepth/2)
+        // Reduce default text size
+        bubbleNode.scale = SCNVector3Make(0.2, 0.2, 0.2)
+        
+        // CENTRE POINT NODE
+        let sphere = SCNSphere(radius:  0.005)
+        sphere.firstMaterial?.diffuse.contents = UIColor.cyan
+        let sphereNode = SCNNode(geometry: sphere)
+        
+        // BUBBLE PARENT NODE
+        let bubbleNodeParent = SCNNode()
+        bubbleNodeParent.addChildNode(bubbleNode)
+        bubbleNodeParent.addChildNode(sphereNode)
+        bubbleNodeParent.constraints = [billboardConstraint]
+        
+        return bubbleNodeParent
     }
 }
